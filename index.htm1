@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آزمایشگاه جادویی تغییرات</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Tahoma, "Vazirmatn", sans-serif;
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 15% 15%, rgba(255,255,255,.55) 0 45px, transparent 46px),
+            radial-gradient(circle at 85% 25%, rgba(255,255,255,.35) 0 35px, transparent 36px),
+            linear-gradient(135deg, #dff5df, #b9e4c5 50%, #91cfa5);
+        color: #24452d;
+        overflow-x: hidden;
+    }
+
+    button, input {
+        font-family: inherit;
+    }
+
+    .screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 25px;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* صفحه ورود */
+    .welcome-card {
+        width: min(650px, 95%);
+        background: rgba(255,255,255,.94);
+        border-radius: 35px;
+        padding: 45px 35px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(40,90,50,.2);
+        border: 6px solid #6ba875;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-card::before,
+    .welcome-card::after {
+        content: "";
+        position: absolute;
+        font-size: 55px;
+        opacity: .25;
+    }
+
+    .welcome-card::before {
+        content: "🌿";
+        left: 15px;
+        top: 15px;
+    }
+
+    .welcome-card::after {
+        content: "🌻";
+        right: 15px;
+        bottom: 15px;
+    }
+
+    .logo {
+        font-size: 70px;
+        margin-bottom: 10px;
+        animation: float 2.5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        50% { transform: translateY(-8px) rotate(3deg); }
+    }
+
+    h1 {
+        color: #26733b;
+        font-size: clamp(27px, 6vw, 42px);
+        margin-bottom: 15px;
+    }
+
+    .subtitle {
+        font-size: 18px;
+        line-height: 2;
+        margin-bottom: 25px;
+        color: #46634b;
+    }
+
+    .name-input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 3px solid #9aca9e;
+        border-radius: 18px;
+        outline: none;
+        font-size: 18px;
+        text-align: center;
+        background: #f5fff5;
+        margin-bottom: 18px;
+        transition: .25s;
+    }
+
+    .name-input:focus {
+        border-color: #3d9251;
+        box-shadow: 0 0 0 5px rgba(61,146,81,.12);
+    }
+
+    .main-btn {
+        border: none;
+        cursor: pointer;
+        color: white;
+        background: linear-gradient(135deg, #358c4b, #246d39);
+        padding: 15px 35px;
+        border-radius: 18px;
+        font-size: 19px;
+        font-weight: bold;
+        box-shadow: 0 8px 0 #19532a;
+        transition: .15s;
+    }
+
+    .main-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .main-btn:active {
+        transform: translateY(5px);
+        box-shadow: 0 3px 0 #19532a;
+    }
+
+    .designer {
+        margin-top: 35px;
+        font-size: 15px;
+        color: #637b67;
+        border-top: 1px dashed #b6cdb9;
+        padding-top: 18px;
+    }
+
+    /* محیط بازی */
+    #gameScreen {
+        align-items: flex-start;
+    }
+
+    .game-container {
+        width: min(1000px, 96%);
+        margin: 0 auto;
+        padding: 15px 0 35px;
+    }
+
+    .top-panel {
+        background: rgba(255,255,255,.93);
+        border-radius: 25px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 18px;
+        box-shadow: 0 10px 30px rgba(45,90,50,.15);
+        border: 3px solid #a2cca5;
+    }
+
+    .hello {
+        font-size: 20px;
+        font-weight: bold;
+        color: #27723b;
+    }
+
+    .score-box {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .badge {
+        padding: 9px 14px;
+        border-radius: 13px;
+        background: #e9f8e9;
+        border: 2px solid #b8dcb9;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .instruction {
+        text-align: center;
+        background: #fff9df;
+        border: 3px solid #e5c96c;
+        padding: 16px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        font-size: 17px;
+        line-height: 1.9;
+    }
+
+    .instruction strong {
+        color: #8a6411;
+    }
+
+    /* باغ */
+    .garden-frame {
+        background:
+            linear-gradient(90deg, #8b5a32 0 10px, transparent 10px 30px) repeat-x,
+            linear-gradient(0deg, #8b5a32 0 10px, transparent 10px 30px) repeat-y,
+            #a96f3d;
+        border: 18px solid #734522;
+        border-radius: 25px;
+        padding: 16px;
+        box-shadow:
+            inset 0 0 0 5px #c28a52,
+            0 18px 30px rgba(62,42,24,.25);
+    }
+
+    .garden-title {
+        color: #fff7dd;
+        text-align: center;
+        font-size: 22px;
+        margin-bottom: 13px;
+        text-shadow: 0 2px 2px #4e2d16;
+    }
+
+    .garden {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        gap: 7px;
+        aspect-ratio: 5 / 4;
+        background: #69401f;
+        padding: 7px;
+        border-radius: 10px;
+    }
+
+    .soil-cell {
+        border: 2px solid #85532c;
+        border-radius: 9px;
+        background:
+            radial-gradient(circle at 30% 30%, #8f6037 0 2px, transparent 3px),
+            radial-gradient(circle at 70% 70%, #6f4627 0 2px, transparent 3px),
+            #80502b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(25px, 6vw, 43px);
+        transition: .18s;
+        min-width: 0;
+        user-select: none;
+    }
+
+    .soil-cell:hover:not(.planted) {
+        transform: scale(.96);
+        filter: brightness(1.12);
+    }
+
+    .soil-cell.planted {
+        cursor: default;
+        background:
+            radial-gradient(circle at 20% 25%, rgba(255,255,255,.15), transparent 20%),
+            linear-gradient(145deg, #68bd67, #3b944a);
+        border-color: #2f773a;
+        animation: popIn .4s cubic-bezier(.17,.89,.32,1.3);
+        box-shadow: inset 0 -5px 0 rgba(0,0,0,.08);
+    }
+
+    @keyframes popIn {
+        0% {
+            transform: scale(.3) rotate(-10deg);
+            opacity: .2;
+        }
+        70% {
+            transform: scale(1.08) rotate(4deg);
+        }
+        100% {
+            transform: scale(1) rotate(0);
+            opacity: 1;
+        }
+    }
+
+    /* پرسش */
+    .question-card {
+        margin-top: 22px;
+        background: rgba(255,255,255,.96);
+        border: 4px solid #67a96d;
+        border-radius: 25px;
+        padding: 25px;
+        text-align: center;
+        animation: slideUp .5s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .question-card h2 {
+        font-size: clamp(20px, 4vw, 27px);
+        color: #286c38;
+        margin-bottom: 20px;
+    }
+
+    .answers {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .answer-btn {
+        min-width: 100px;
+        padding: 13px 25px;
+        border-radius: 15px;
+        border: 3px solid #83b887;
+        background: #f0faef;
+        color: #24592d;
+        font-size: 21px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .answer-btn:hover {
+        background: #d8f1d8;
+        transform: translateY(-3px);
+    }
+
+    .feedback {
+        margin-top: 18px;
+        font-size: 18px;
+        font-weight: bold;
+        min-height: 28px;
+    }
+
+    .wrong {
+        color: #b04b35;
+    }
+
+    .correct {
+        color: #28753b;
+    }
+
+    .success-card {
+        margin-top: 20px;
+        background: linear-gradient(135deg, #fff9d9, #effbdc);
+        border: 4px solid #d5ad36;
+        border-radius: 25px;
+        padding: 28px;
+        text-align: center;
+        animation: popIn .6s ease;
+    }
+
+    .success-card .big {
+        font-size: 60px;
+    }
+
+    .success-card h2 {
+        color: #36743e;
+        margin: 10px 0;
+    }
+
+    .success-card p {
+        font-size: 19px;
+        line-height: 2;
+    }
+
+    .restart {
+        margin-top: 18px;
+        background: #b47a35;
+        box-shadow: 0 6px 0 #765020;
+        padding: 11px 25px;
+    }
+
+    .progress {
+        height: 10px;
+        width: 100%;
+        background: #dbe9db;
+        border-radius: 10px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #48a95a, #86cf61);
+        transition: width .3s;
+    }
+
+    .error-name {
+        color: #bd4d3b;
+        font-size: 14px;
+        min-height: 20px;
+        margin-bottom: 8px;
+    }
+
+    @media (max-width: 650px) {
+        .screen {
+            padding: 14px;
+        }
+
+        .welcome-card {
+            padding: 35px 20px;
+        }
+
+        .top-panel {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .game-container {
+            width: 100%;
+        }
+
+        .garden-frame {
+            border-width: 11px;
+            padding: 10px;
+        }
+
+        .garden {
+            gap: 4px;
+            padding: 4px;
+        }
+
+        .soil-cell {
+            border-width: 1px;
+            border-radius: 6px;
+        }
+
+        .instruction {
+            font-size: 15px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- صفحه ورود -->
+<section id="welcomeScreen" class="screen">
+    <div class="welcome-card">
+        <div class="logo">🧪🌱</div>
+
+        <h1>به آزمایشگاه جادویی تغییرات خوش آمدید!</h1>
+
+        <p class="subtitle">
+            🏡 آماده‌ای دانشمند کوچولو؟<br>
+            بیا با هم کشف کنیم چه چیزهایی
+            <strong>تغییر فیزیکی</strong> و چه چیزهایی
+            <strong>تغییر شیمیایی</strong> هستند! 🌻
+        </p>
+
+        <input
+            id="studentName"
+            class="name-input"
+            type="text"
+            maxlength="30"
+            placeholder="نام خود را وارد کنید..."
+            autocomplete="off"
+        >
+
+        <div id="nameError" class="error-name"></div>
+
+        <button id="startBtn" class="main-btn">
+            🚀 شروع آزمایش
+        </button>
+
+        <div class="designer">
+            طراح بازی: <strong>آتفه فریدزاده</strong> 🌿
+        </div>
+    </div>
+</section>
+
+
+<!-- صفحه بازی -->
+<section id="gameScreen" class="screen hidden">
+    <div class="game-container">
+
+        <div class="top-panel">
+            <div class="hello">
+                👩‍🔬 سلام <span id="playerName">دانشمند</span>!
+                <br>
+                <small>آماده‌ای تغییرات را کشف کنی؟</small>
+            </div>
+
+            <div class="score-box">
+                <div class="badge">
+                    🧠 امتیاز: <span id="score">0</span>
+                </div>
+
+                <div class="badge">
+                    🔬 سؤال: <span id="questionNumber">1</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="instruction">
+            <strong>🔎 مأموریت دانشمند:</strong><br>
+            کارت‌های آزمایش را بخوان و انتخاب کن که تغییر اتفاق‌افتاده
+            <strong>فیزیکی</strong> است یا <strong>شیمیایی</strong>.
+            <div class="progress">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div id="experimentCard" class="question-card">
+
+            <div id="experimentEmoji"
+                 style="font-size:65px; margin-bottom:10px;">
+                🧊
+            </div>
+
+            <h2 id="experimentText">
+                یخ آب می‌شود. این تغییر چیست؟
+            </h2>
+
+            <div class="answers">
+                <button class="answer-btn" data-answer="physical">
+                    🔵 فیزیکی
+                </button>
+
+                <button class="answer-btn" data-answer="chemical">
+                    🟠 شیمیایی
+                </button>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+        </div>
+
+        <div id="finalCard" class="success-card hidden">
+            <div class="big">🎉🏆🧪</div>
+
+            <h2>آفرین دانشمند کوچولو!</h2>
+
+            <p>
+                تو با موفقیت آزمایش‌ها را بررسی کردی و
+                تغییرات فیزیکی و شیمیایی را از هم تشخیص دادی.
+            </p>
+
+            <p>
+                <strong>
+                    تغییر فیزیکی:
+                </strong>
+                در آن ماده جدیدی به وجود نمی‌آید؛
+                فقط شکل، اندازه یا حالت ماده تغییر می‌کند.
+            </p>
+
+            <p>
+                <strong>
+                    تغییر شیمیایی:
+                </strong>
+                ماده یا مواد جدیدی به وجود می‌آیند.
+            </p>
+
+            <button id="restartBtn" class="main-btn restart">
+                🔄 بازی دوباره
+            </button>
+        </div>
+
+    </div>
+</section>
+
+
+<script>
+    // -----------------------------
+    // داده‌های آموزشی بازی
+    // -----------------------------
+
+    const experiments = [
+        {
+            emoji: "🧊",
+            text: "یخ آب می‌شود. این تغییر چیست؟",
+            answer: "physical",
+            explanation: "یخ فقط از حالت جامد به مایع تبدیل شده و ماده جدیدی ساخته نشده است."
+        },
+        {
+            emoji: "🍎",
+            text: "یک سیب را می‌بُریم و تکه‌های آن کوچک‌تر می‌شوند. این تغییر چیست؟",
+            answer: "physical",
+            explanation: "شکل و اندازه تغییر کرده است، اما ماده جدیدی ساخته نشده است."
+        },
+        {
+            emoji: "🔥",
+            text: "چوب می‌سوزد و خاکستر و دود ایجاد می‌شود. این تغییر چیست؟",
+            answer: "chemical",
+            explanation: "در سوختن چوب مواد جدیدی مانند خاکستر و گازها تشکیل می‌شوند."
+        },
+        {
+            emoji: "🍫",
+            text: "شکلات را خرد می‌کنیم. این تغییر چیست؟",
+            answer: "physical",
+            explanation: "شکلات فقط به قطعات کوچک‌تر تبدیل شده و ماده جدیدی ایجاد نشده است."
+        },
+        {
+            emoji: "🥛",
+            text: "شیر ترش می‌شود. این تغییر چیست؟",
+            answer: "chemical",
+            explanation: "مواد موجود در شیر تغییر می‌کنند و مواد جدیدی ایجاد می‌شود."
+        },
+        {
+            emoji: "📄",
+            text: "یک کاغذ را تا می‌زنیم. این تغییر چیست؟",
+            answer: "physical",
+            explanation: "فقط شکل کاغذ تغییر کرده و ماده جدیدی به وجود نیامده است."
+        },
+        {
+            emoji: "🥚",
+            text: "تخم‌مرغ را می‌پزیم. این تغییر چیست؟",
+            answer: "chemical",
+            explanation: "بر اثر پختن، ویژگی‌های ماده تغییر می‌کند و تغییر شیمیایی رخ می‌دهد."
+        },
+        {
+            emoji: "💧",
+            text: "آب در فریزر به یخ تبدیل می‌شود. این تغییر چیست؟",
+            answer: "physical",
+            explanation: "آب فقط حالت خود را تغییر داده و دوباره می‌تواند به آب تبدیل شود."
+        },
+        {
+            emoji: "🍞",
+            text: "نان را بیش از حد در فر می‌گذاریم و می‌سوزد. این تغییر چیست؟",
+            answer: "chemical",
+            explanation: "سوختن باعث تشکیل مواد جدید می‌شود."
+        },
+        {
+            emoji: "✂️",
+            text: "پارچه را با قیچی به چند قسمت می‌بریم. این تغییر چیست؟",
+            answer: "physical",
+            explanation: "فقط اندازه و شکل پارچه تغییر کرده است."
+        }
+    ];
+
+
+    // -----------------------------
+    // عناصر صفحه
+    // -----------------------------
+
+    const welcomeScreen = document.getElementById("welcomeScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const studentName = document.getElementById("studentName");
+    const nameError = document.getElementById("nameError");
+
+    const playerName = document.getElementById("playerName");
+    const experimentEmoji = document.getElementById("experimentEmoji");
+    const experimentText = document.getElementById("experimentText");
+    const feedback = document.getElementById("feedback");
+    const scoreElement = document.getElementById("score");
+    const questionNumber = document.getElementById("questionNumber");
+    const progressBar = document.getElementById("progressBar");
+    const experimentCard = document.getElementById("experimentCard");
+    const finalCard = document.getElementById("finalCard");
+
+
+    // -----------------------------
+    // وضعیت بازی
+    // -----------------------------
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+
+    // -----------------------------
+    // شروع بازی
+    // -----------------------------
+
+    startBtn.addEventListener("click", startGame);
+
+    studentName.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            startGame();
+        }
+    });
+
+
+    function startGame() {
+        const name = studentName.value.trim();
+
+        if (!name) {
+            nameError.textContent = "🌱 لطفاً ابتدا نامت را وارد کن!";
+            studentName.focus();
+            return;
+        }
+
+        nameError.textContent = "";
+
+        playerName.textContent = name;
+
+        welcomeScreen.classList.add("hidden");
+        gameScreen.classList.remove("hidden");
+
+        currentQuestion = 0;
+        score = 0;
+
+        loadQuestion();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+
+    // -----------------------------
+    // نمایش سؤال
+    // -----------------------------
+
+    function loadQuestion() {
+        answered = false;
+
+        if (currentQuestion >= experiments.length) {
+            showFinal();
+            return;
+        }
+
+        const experiment = experiments[currentQuestion];
+
+        experimentEmoji.textContent = experiment.emoji;
+        experimentText.textContent = experiment.text;
+
+        questionNumber.textContent = currentQuestion + 1;
+        scoreElement.textContent = score;
+
+        feedback.textContent = "";
+        feedback.className = "feedback";
+
+        progressBar.style.width =
+            ((currentQuestion) / experiments.length * 100) + "%";
+
+        document.querySelectorAll(".answer-btn").forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        });
+    }
+
+
+    // -----------------------------
+    // بررسی پاسخ
+    // -----------------------------
+
+    document.querySelectorAll(".answer-btn").forEach(button => {
+
+        button.addEventListener("click", function() {
+
+            if (answered) return;
+
+            answered = true;
+
+            const selectedAnswer = this.dataset.answer;
+            const experiment = experiments[currentQuestion];
+
+            document.querySelectorAll(".answer-btn").forEach(btn => {
+                btn.disabled = true;
+            });
+
+            if (selectedAnswer === experiment.answer) {
+
+                score += 10;
+
+                feedback.textContent =
+                    "✅ آفرین! پاسخ درست است. " +
+                    experiment.explanation;
+
+                feedback.className = "feedback correct";
+
+                this.style.background = "#d5f2d4";
+                this.style.borderColor = "#4b9d54";
+
+                progressBar.style.width =
+                    ((currentQuestion + 1) / experiments.length * 100) + "%";
+
+                scoreElement.textContent = score;
+
+                setTimeout(() => {
+                    currentQuestion++;
+                    loadQuestion();
+                }, 2200);
+
+            } else {
+
+                feedback.textContent =
+                    "🌱 هنوز نه! دوباره فکر کن و پاسخ دیگری را امتحان کن.";
+
+                feedback.className = "feedback wrong";
+
+                this.style.background = "#ffe2dc";
+                this.style.borderColor = "#c86b58";
+
+                // اجازه پاسخ مجدد
+                setTimeout(() => {
+                    answered = false;
+
+                    document.querySelectorAll(".answer-btn").forEach(btn => {
+                        btn.disabled = false;
+                    });
+
+                    this.style.background = "";
+                    this.style.borderColor = "";
+
+                }, 1000);
+            }
+        });
+
+    });
+
+
+    // -----------------------------
+    // پایان بازی
+    // -----------------------------
+
+    function showFinal() {
+
+        experimentCard.classList.add("hidden");
+        finalCard.classList.remove("hidden");
+
+        progressBar.style.width = "100%";
+    }
+
+
+    // -----------------------------
+    // شروع دوباره
+    // -----------------------------
+
+    restartBtn.addEventListener("click", function() {
+
+        currentQuestion = 0;
+        score = 0;
+
+        finalCard.classList.add("hidden");
+        experimentCard.classList.remove("hidden");
+
+        loadQuestion();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    });
+
+</script>
+
+</body>
+</html>
